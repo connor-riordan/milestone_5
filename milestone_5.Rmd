@@ -1,0 +1,178 @@
+---
+title: "milestone_5"
+author: "Connor Riordan"
+date: "3/20/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(readxl)
+library(janitor)
+library(gt)
+library(scales)
+
+```
+
+```{r, include = FALSE}
+
+# In this data, I decided to use head() and gt() in order to make the data look
+# nice when knitting.
+
+```
+
+## Voting Age by Region 2016
+
+```{r, age_by_region_voting_2016, echo = FALSE, message=FALSE, warning=FALSE}
+age_by_region_voting_2016 <- read_xlsx("Raw-data/age_by_region_voting_2016.xlsx", skip = 6) %>%
+  clean_names()
+
+age_by_region_voting_2016_revised <- age_by_region_voting_2016 %>%
+  rename("Region" = x1,
+         "Region Part" = x2,
+         "Age" = x3, 
+         "Total Population" = x4,
+         "Total Citizen Population" = x5,
+         "Reported Registered (Number)" = number_6,
+         "Reported Registered (Percent)" = percent_7,
+         "Reported Not Registered (Number)" = number_8,
+         "Reported Not Registered (Percent)" = percent_9,
+         "No Response (Number)" = number_10,
+         "No Response (Percent)" = percent_11,
+         "Reported Voted (Number)" = number_12,
+         "Reported Voted (Percent)" = percent_13,
+         "Reported Not Voted (Number)" = number_14,
+         "Reported Not Voted (Percent)" = percent_15,
+         "No Response to Voting (Number)" = number_16,
+         "No Response to Voting (Percent)" = percent_17,
+         "Reported Registered" = percent_18,
+         "Reported Voted" = percent_19)
+
+northeast_total <- age_by_region_voting_2016_revised %>%
+  select(-c(`Region`, `Region Part`)) %>%
+  slice(2:7)
+
+northeast_total_plot <- northeast_total %>%
+  ggplot(aes(Age, `Total Population`)) + geom_bar(stat = "identity")
+
+northeast_total_plot
+```
+
+## Age Characteristics of Voters 2018
+
+```{r, age_characteristics_voting_2018, echo = FALSE, message=FALSE, warning=FALSE}
+age_characteristics_voting_2018 <- read_xlsx("Raw-data/age_characteristics_voting_2018.xlsx", skip = 2) %>%
+  clean_names()
+
+age_characteristics_voting_2018_revised <- age_characteristics_voting_2018 %>%
+  drop_na() %>%
+  rename("Total Voting Age Population (estimate)" = citizen_voting_age_population,
+         "Total Age 18-29 (estimate)" = age,
+         "Total Age 30-44 (estimate)" = x11,
+         "Total Age 45-64 (estimate)" = x15,
+         "Total Age 65+ (estimate)" = x19,
+         "Margin of error (MOE)" = x6, 
+         "Margin of error (MOE) 18-29" = x8, 
+         "Margin of error (MOE) 30-44" = x12, 
+         "Margin of error (MOE) 45-64" = x16, 
+         "Margin of error (MOE)65+" = x20,
+         "Percent of total 18-29" = x9, 
+         "Percent of total 30-44" = x13, 
+         "Percent of total 45-64" = x17, 
+         "Percent of total 65+" = x21,
+         "Percent of total margin of error (MOE) 18-29" = x10, 
+         "Percent of total margin of error (MOE) 30-44" = x14, 
+         "Percent of total margin of error (MOE) 45-64" = x18, 
+         "Percent of total margin of error (MOE) 65+" = x22)
+
+
+age_characteristics_voting_2018_revised %>%
+  ggplot(aes(x = state_name, y = `Total Voting Age Population (estimate)`)) + geom_bar(stat = "identity")
+
+
+```
+
+
+age_characteristics_voting_2018_revised %>%
+  cols_merge(columns = vars(state_name, congressional_district),
+             pattern = "{1}&mdash;{2}") %>%
+  cols_hide(columns = vars(line_number, state_abbreviation)) %>%
+  cols_label(state_name = "State and Congressional District")
+
+
+## Civic Education Requirements by State
+
+```{r, civic_education_requirements_by_state, echo = FALSE, message=FALSE, warning=FALSE}
+civic_education_requirements_by_state <- read_csv("Raw-data/civic_education_requirements_by_state.csv") %>%
+  clean_names()
+
+civic_education_requirements_by_state_revised <- civic_education_requirements_by_state %>%
+  select(-"notes") %>%
+  gt()
+
+civic_education_requirements_by_state_revised %>%
+  ggplot(aes(state, course_span_years)) + geom_histogram(stat = "identity")
+
+
+```
+
+## Votes Cast by Voting Age 2018
+
+```{r, votes_cast_voting_age_2018, echo = FALSE, message=FALSE, warning=FALSE}
+votes_cast_voting_age_2018 <- read_xlsx("Raw-data/votes_cast_voting_age_2018.xlsx", skip = 2) %>%
+  clean_names()
+
+votes_cast_voting_age_2018_revised <- votes_cast_voting_age_2018 %>%
+  select(-line_number) %>%
+  drop_na() %>%
+  rename("Votes Cast" = votes_cast_for_congressional_representative_for_the_november_6_2018_election1, 
+         "Number of Eligible Citizens (Estimate)" = citizen_voting_age_population2,
+         "Margin of Error (MOE)" = x7,
+         "Voting Rate" = voting_rate3,
+         "MOE" = x9)
+
+votes_cast_voting_age_2018_revised %>%
+  ggplot(aes(state_abbreviation, `Votes Cast`)) + geom_bar(stat = "identity") +
+  labs(
+    title = "Votes Cast by Voting Age 2018",
+    x = "State (Abbreviated)"
+  ) +
+  scale_y_continuous(labels = comma) +
+  theme(axis.text.x = element_text(angle = 90)) +
+  theme_bw()
+
+```
+
+## Recorded Voting by Age 2016
+
+```{r, recorded_voting_by_age_2016, echo = FALSE, message=FALSE, warning=FALSE}
+recorded_voting_by_age_2016 <- read_xlsx("Raw-data/recorded_voting_by_age_2016.xlsx", skip = 2) %>%
+  clean_names()
+
+recorded_voting_by_age_2016_revised <- recorded_voting_by_age_2016 %>%
+  rename("State" = in_thousands,
+         "Age" = x2,
+         "Total Population" = x3,
+         "Total Citizen Population" = x4,
+         "Total Registered" = x5,
+         "Total Registered (Percent)" = x6,
+         "Margin of Error (MOE)" = x7,
+         "Percent Registered (Citizen)" = x8,
+         "MOE" = x9,
+         "Total Voted" = x10,
+         "Total Voted (Percent)" = x11,
+         "MOE_3" = x12,
+         "Percent Voted (Citizen)" = x13,
+         "MOE_4" = x14)
+
+
+US <- recorded_voting_by_age_2016_revised %>%
+  select(-State) %>%
+  slice(4:8)
+
+US %>%
+  ggplot(aes(Age, `Total Population`)) + geom_bar(stat = "identity")
+
+```
