@@ -91,6 +91,7 @@ age_characteristics_voting_2018_revised <- age_characteristics_voting_2018 %>%
 age_characteristics_voting_2018_revised %>%
   ggplot(aes(x = state_name, y = `Total Voting Age Population (estimate)`)) + geom_bar(stat = "identity")
 
+age_characteristics_voting_2018_revised
 
 ```
 
@@ -112,9 +113,7 @@ civic_education_requirements_by_state_revised <- civic_education_requirements_by
   select(-"notes") %>%
   gt()
 
-civic_education_requirements_by_state_revised %>%
-  ggplot(aes(state, course_span_years)) + geom_histogram(stat = "identity")
-
+civic_education_requirements_by_state_revised
 
 ```
 
@@ -133,15 +132,39 @@ votes_cast_voting_age_2018_revised <- votes_cast_voting_age_2018 %>%
          "Voting Rate" = voting_rate3,
          "MOE" = x9)
 
-votes_cast_voting_age_2018_revised %>%
+by_abbreviation <- votes_cast_voting_age_2018_revised %>%
   ggplot(aes(state_abbreviation, `Votes Cast`)) + geom_bar(stat = "identity") +
   labs(
     title = "Votes Cast by Voting Age 2018",
     x = "State (Abbreviated)"
   ) +
   scale_y_continuous(labels = comma) +
-  theme(axis.text.x = element_text(angle = 90)) +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90))
+
+by_congressional_district_AL <- votes_cast_voting_age_2018_revised %>%
+  filter(state_name == "Alabama") %>%
+  ggplot(aes(congressional_district, `Votes Cast`)) + geom_bar(stat = "identity") +
+  labs(
+    title = "Votes Cast by Voting Age 2018",
+    subtitle = "Alabama"
+  ) +
+  scale_y_continuous(labels = comma) +
   theme_bw()
+
+by_congressional_district_AL
+
+by_congressional_district_AK <- votes_cast_voting_age_2018_revised %>%
+  filter(state_name == "Alaska") %>%
+  ggplot(aes(congressional_district, `Votes Cast`)) + geom_bar(stat = "identity", width = 0.5) +
+  labs(
+    title = "Votes Cast by Voting Age 2018",
+    subtitle = "Alaska"
+  ) +
+  scale_y_continuous(labels = comma) +
+  theme_bw()
+
+by_congressional_district_AK
 
 ```
 
