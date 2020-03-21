@@ -26,6 +26,10 @@ library(scales)
 ## Voting Age by Region 2016
 
 ```{r, age_by_region_voting_2016, echo = FALSE, message=FALSE, warning=FALSE}
+
+# For this milestone, I didn't do much with this data because I have a question
+# that I need to ask my TF, June, before I proceed with my data.
+
 age_by_region_voting_2016 <- read_xlsx("Raw-data/age_by_region_voting_2016.xlsx", skip = 6) %>%
   clean_names()
 
@@ -63,6 +67,13 @@ northeast_total_plot
 ## Age Characteristics of Voters 2018
 
 ```{r, age_characteristics_voting_2018, echo = FALSE, message=FALSE, warning=FALSE}
+
+# With this data, I tried figuring out how to swithch the character/list 
+# variables to numeric so I would be able to plot them with ggplot. 
+# Unfortunately, this is another set of data where I have to ask June,
+# since as.numeric did not work. However, I did put it into a pretty
+# ggplot!
+
 age_characteristics_voting_2018 <- read_xlsx("Raw-data/age_characteristics_voting_2018.xlsx", skip = 2) %>%
   clean_names()
 
@@ -88,12 +99,18 @@ age_characteristics_voting_2018_revised <- age_characteristics_voting_2018 %>%
          "Percent of total margin of error (MOE) 65+" = x22)
 
 
-age_characteristics_voting_2018_revised %>%
+state_total_voting_age_pop <- age_characteristics_voting_2018_revised %>%
   ggplot(aes(x = state_name, y = `Total Voting Age Population (estimate)`)) + geom_bar(stat = "identity")
 
-age_characteristics_voting_2018_revised
 
 ```
+## Unused (but needed) code
+
+by_abbreviation_total_voting_age <- age_characteristics_voting_2018_revised %>%
+  as.numeric(character) %>%
+  ggplot(aes(state_abbreviation, 'Total Voting Age Population (estimate)')) + geom_bar(stat = "identity") +
+  scale_y_continuous()
+
 
 
 age_characteristics_voting_2018_revised %>%
@@ -106,6 +123,11 @@ age_characteristics_voting_2018_revised %>%
 ## Civic Education Requirements by State
 
 ```{r, civic_education_requirements_by_state, echo = FALSE, message=FALSE, warning=FALSE}
+
+# I still need to figue out what I want to do with this data - possibly a join,
+# perhaps I'll keep it in a gt() table, I am not sure. Unfortunately, this is
+# not the kind of data that I want to put into a ggplot because it looks ugly.
+
 civic_education_requirements_by_state <- read_csv("Raw-data/civic_education_requirements_by_state.csv") %>%
   clean_names()
 
@@ -120,6 +142,14 @@ civic_education_requirements_by_state_revised
 ## Votes Cast by Voting Age 2018
 
 ```{r, votes_cast_voting_age_2018, echo = FALSE, message=FALSE, warning=FALSE}
+
+# For this milestone, I took the data and put it into three separate ggplots -
+# one for the entire US by state abbreviation, one for just the congressional
+# districts of Alabama, and one for the congressional districts of Alaska.
+# The plots look beautiful, if I do say so myself. This is what I want to do 
+# for every state, although hopefully there will be a way to replicate the
+# process that is not as time-consuming and painful.
+
 votes_cast_voting_age_2018 <- read_xlsx("Raw-data/votes_cast_voting_age_2018.xlsx", skip = 2) %>%
   clean_names()
 
@@ -171,6 +201,13 @@ by_congressional_district_AK
 ## Recorded Voting by Age 2016
 
 ```{r, recorded_voting_by_age_2016, echo = FALSE, message=FALSE, warning=FALSE}
+
+# Like the data before this one, I wanted to divide this by both the US
+# and by each state so we can examine the age groups from all of these separate
+# samples. I hope to replicate the plot for every state that is included in the
+# data set, once again hopefully finding a way to do this without typing out
+# the same code time and again.
+
 recorded_voting_by_age_2016 <- read_xlsx("Raw-data/recorded_voting_by_age_2016.xlsx", skip = 2) %>%
   clean_names()
 
@@ -195,7 +232,82 @@ US <- recorded_voting_by_age_2016_revised %>%
   select(-State) %>%
   slice(4:8)
 
-US %>%
-  ggplot(aes(Age, `Total Population`)) + geom_bar(stat = "identity")
+US_recorded_voting_by_age <- US %>%
+  ggplot(aes(Age, `Total Population`)) + geom_bar(stat = "identity") +
+  labs(
+    title = "Recorded Voting by Age 2016",
+    subtitle = "United States"
+  ) +
+  theme_bw()
+
+US_recorded_voting_by_age
+
+Alabama <- recorded_voting_by_age_2016_revised %>%
+  select(-State) %>%
+  slice(8:12)
+
+Alabama_recorded_voting_by_age <- Alabama %>%
+  ggplot(aes(Age, `Total Population`)) + geom_bar(stat = "identity") +
+  labs(
+    title = "Recorded Voting by Age 2016",
+    subtitle = "Alabama"
+  ) +
+  theme_bw()
+
+Alabama_recorded_voting_by_age
 
 ```
+
+
+```{r, voting_by_age_sex_nov_2018, echo = FALSE, message = FALSE, error = FALSE}
+
+# This is more data that I wanted to include in my project. I think it's
+# important to include as much voting information as possible from a number
+# of different years so it is possible to compare voting patterns and map
+# civic education to those patterns. With this data I also had a paroblem
+# turning character variables into numeric variables so I am hoping June
+# will be able to assist me with that as well.
+
+voting_by_age_sex_nov_2018 <- read_xlsx("Raw-data/voting_by_age_sex_nov_2018.xlsx") %>%
+  clean_names()
+
+voting_by_age_sex_nov_2018_revised <- voting_by_age_sex_nov_2018 %>%
+  select(! "table_with_row_headers_in_columns_a_and_b_and_column_headers_in_rows_5_through_7") %>%
+  rename(
+    "Age" = x2,
+    "Total Population" = x3,
+    "Total Citizen Population" = x4,
+    "Reported Registered" = x5,
+    "Percent Recorded Registered" = x6,
+    "Recorded Not Registered" = x7,
+    "Percent Recorded Not Registered" = x8,
+    "No Response to Registration" = x9,
+    "Percent No Response to Registration" = x10,
+    "Reported Voted" = x11,
+    "Percent Reported Voted" = x12,
+    "Reported Not Voted" = x13,
+    "Percent Reported Not Voted" = x14,
+    "No Response to Voted" = x15,
+    "Percent No Response to Voted" = x16,
+    "Total Reported Registered Percent" = x17,
+    "Total Voted Percent" = x18
+  ) %>%
+  slice(1:78)
+
+
+voting_by_age_sex_nov_2018_revised %>%
+  ggplot(aes(Age, 'Total Population')) + geom_bar(stat = "identity") +
+  labs(
+    title = "Voting by Age for Both Sexes",
+    subtitie = "Total Population",
+    x = "Age Group",
+    y = "Population"
+  ) + theme_bw()
+
+
+```
+
+
+
+
+
