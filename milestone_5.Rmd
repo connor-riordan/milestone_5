@@ -74,8 +74,13 @@ northeast_total_plot
 # since as.numeric did not work. However, I did put it into a pretty
 # ggplot!
 
-age_characteristics_voting_2018 <- read_xlsx("Raw-data/age_characteristics_voting_2018.xlsx", skip = 2) %>%
-  clean_names()
+# use col_types to specify what value you want your columns to be.
+
+age_characteristics_voting_2018_numeric <- read_xlsx("Raw-data/age_characteristics_voting_2018.xlsx", skip = 2, col_types = "numeric") %>%
+  clean_names() %>%
+  select(!c(state_abbreviation, state_name, congressional_district))
+
+age_characteristics
 
 age_characteristics_voting_2018_revised <- age_characteristics_voting_2018 %>%
   drop_na() %>%
@@ -100,7 +105,7 @@ age_characteristics_voting_2018_revised <- age_characteristics_voting_2018 %>%
 
 
 state_total_voting_age_pop <- age_characteristics_voting_2018_revised %>%
-  ggplot(aes(x = state_name, y = `Total Voting Age Population (estimate)`)) + geom_bar(stat = "identity")
+  ggplot(aes(x = state_name, y = 'Total Voting Age Population (estimate)')) + geom_bar(stat = "identity")
 
 
 ```
@@ -171,6 +176,8 @@ by_abbreviation <- votes_cast_voting_age_2018_revised %>%
   scale_y_continuous(labels = comma) +
   theme_bw() +
   theme(axis.text.x = element_text(angle = 90))
+
+by_abbreviation
 
 by_congressional_district_AL <- votes_cast_voting_age_2018_revised %>%
   filter(state_name == "Alabama") %>%
