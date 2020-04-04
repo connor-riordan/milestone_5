@@ -13,7 +13,7 @@ library(readxl)
 library(janitor)
 library(gt)
 library(scales)
-
+library(markdown)
 ```
 
 ```{r, include = FALSE}
@@ -80,10 +80,22 @@ age_characteristics_voting_2018_numeric <- read_xlsx("Raw-data/age_characteristi
   clean_names() %>%
   select(!c(state_abbreviation, state_name, congressional_district))
 
-age_characteristics
+age_characteristics_voting_2018_character <- read_xlsx("Raw-data/age_characteristics_voting_2018.xlsx", skip = 2, col_types = "text") %>%
+  clean_names() %>%
+  select(c(state_abbreviation, state_name, congressional_district))
 
-age_characteristics_voting_2018_revised <- age_characteristics_voting_2018 %>%
-  drop_na() %>%
+age_characteristics_voting_2018 <- cbind(age_characteristics_voting_2018_character, age_characteristics_voting_2018_numeric)%>%
+  drop_na() 
+
+state_total_voting_age_pop <- age_characteristics_voting_2018 %>%
+  ggplot(aes(x = state_name, y = citizen_voting_age_population)) + geom_col(stat = "identity") +
+  theme(axis.text.x = element_text(angle = 90))
+
+
+```
+## Unused (but needed) code
+
+%>%
   rename("Total Voting Age Population (estimate)" = citizen_voting_age_population,
          "Total Age 18-29 (estimate)" = age,
          "Total Age 30-44 (estimate)" = x11,
@@ -104,17 +116,6 @@ age_characteristics_voting_2018_revised <- age_characteristics_voting_2018 %>%
          "Percent of total margin of error (MOE) 65+" = x22)
 
 
-state_total_voting_age_pop <- age_characteristics_voting_2018_revised %>%
-  ggplot(aes(x = state_name, y = 'Total Voting Age Population (estimate)')) + geom_bar(stat = "identity")
-
-
-```
-## Unused (but needed) code
-
-by_abbreviation_total_voting_age <- age_characteristics_voting_2018_revised %>%
-  as.numeric(character) %>%
-  ggplot(aes(state_abbreviation, 'Total Voting Age Population (estimate)')) + geom_bar(stat = "identity") +
-  scale_y_continuous()
 
 
 
@@ -178,6 +179,7 @@ by_abbreviation <- votes_cast_voting_age_2018_revised %>%
   theme(axis.text.x = element_text(angle = 90))
 
 by_abbreviation
+
 
 by_congressional_district_AL <- votes_cast_voting_age_2018_revised %>%
   filter(state_name == "Alabama") %>%
@@ -275,11 +277,20 @@ Alabama_recorded_voting_by_age
 # turning character variables into numeric variables so I am hoping June
 # will be able to assist me with that as well.
 
-voting_by_age_sex_nov_2018 <- read_xlsx("Raw-data/voting_by_age_sex_nov_2018.xlsx") %>%
-  clean_names()
+v <- read_xlsx("Raw-data/voting_by_age_sex_nov_2018.xlsx")
+
+voting_by_age_sex_nov_2018_numeric <- read_xlsx("Raw-data/voting_by_age_sex_nov_2018.xlsx", col_types = "numeric") %>%
+  clean_names() %>%
+  select(!c("table_with_row_headers_in_columns_a_and_b_and_column_headers_in_rows_5_through_7", "x2"))
+
+voting_by_age_sex_nov_2018_character <- read_xlsx("Raw-data/voting_by_age_sex_nov_2018.xlsx", col_types = "text") %>%
+  clean_names() %>%
+  select("x2")
+
+voting_by_age_sex_nov_2018 <- cbind(voting_by_age_sex_nov_2018_character, voting_by_age_sex_nov_2018_numeric) %>%
+  drop_na()
 
 voting_by_age_sex_nov_2018_revised <- voting_by_age_sex_nov_2018 %>%
-  select(! "table_with_row_headers_in_columns_a_and_b_and_column_headers_in_rows_5_through_7") %>%
   rename(
     "Age" = x2,
     "Total Population" = x3,
@@ -298,18 +309,17 @@ voting_by_age_sex_nov_2018_revised <- voting_by_age_sex_nov_2018 %>%
     "Percent No Response to Voted" = x16,
     "Total Reported Registered Percent" = x17,
     "Total Voted Percent" = x18
-  ) %>%
-  slice(1:78)
+  )
 
 
-voting_by_age_sex_nov_2018_revised %>%
-  ggplot(aes(Age, 'Total Population')) + geom_bar(stat = "identity") +
+voting_by_age_sex_nov_2018 %>%
+  ggplot(aes(x2, x3)) + geom_bar(stat = "identity") +
   labs(
     title = "Voting by Age for Both Sexes",
     subtitie = "Total Population",
     x = "Age Group",
     y = "Population"
-  ) + theme_bw()
+  ) + theme_bw() + theme(axis.text.x = element_text(angle = 90))
 
 
 ```
