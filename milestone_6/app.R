@@ -1,18 +1,10 @@
 
 
 library(shiny)
-votes_cast_voting_age_2018 <- read_xlsx("Raw-data/votes_cast_voting_age_2018.xlsx", skip = 2) %>%
-    clean_names()
 
-votes_cast_voting_age_2018_revised <- votes_cast_voting_age_2018 %>%
-    select(-line_number) %>%
-    drop_na() %>%
-    rename("Votes Cast" = votes_cast_for_congressional_representative_for_the_november_6_2018_election1, 
-           "Number of Eligible Citizens (Estimate)" = citizen_voting_age_population2,
-           "Margin of Error for Eligible Citizens" = x7,
-           "Voting Rate" = voting_rate3,
-           "Margin of Error for Voting Rate" = x9)
-
+final_votes <- readRDS("votes_cast_voting_age_2018.RDS")
+numeric_votes <- readRDS("votes_cast_voting_age_2018_numeric.RDS")
+character_votes <- readRDS("votes_cast_voting_age_2018_character.RDS")
 
 # Define UI for application
 ui <- fluidPage(
@@ -25,21 +17,25 @@ ui <- fluidPage(
             helpText("Examine voting with 
                voting data from 2018."),
             
-            selectInput("x var",
-                        label = "Choose a state:",
-                        choices = votes_cast_voting_age_2018_revised$state_abbreviation),
-            varSelectInput("variable", "Choose what you want to measure:", 
-                           votes_cast_voting_age_2018_revised, multiple = TRUE)
+            fluidRow(selectInput("state", "Choose a state:", final_votes$state_abbreviation),
+                     selectInput("y_var", "Choose what you want to measure:", choices = c(colnames(final_votes))))
             ),
             
         mainPanel(
+            plotOutput("voting_data"),
+            br(), br(),
+            tableOutput("results")
         )
     )
 )
 # Define server logic required to draw a histogram
 server <- function(input, output) {
-
-
+    output$voting_data <- renderPlot({
+        final_votes %>%
+            pivot_longer(cols = `Votes Cast`:`Margin of Error for Voting Rate`, names_to = "variables", values_to = "n") %>%
+            filter(variables == input$y_var) %>%
+            ggplot(aes(state, n)) + geom_bar(stat = "identity")
+    })
 }
 
 # Run the application 

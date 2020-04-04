@@ -156,8 +156,16 @@ civic_education_requirements_by_state_revised
 # for every state, although hopefully there will be a way to replicate the
 # process that is not as time-consuming and painful.
 
-votes_cast_voting_age_2018 <- read_xlsx("Raw-data/votes_cast_voting_age_2018.xlsx", skip = 2) %>%
-  clean_names()
+votes_cast_voting_age_2018_numeric <- read_xlsx("Raw-data/votes_cast_voting_age_2018.xlsx", col_types = "numeric", skip = 2) %>%
+  clean_names() %>%
+  select(!c(state_abbreviation, state_name, congressional_district))
+
+votes_cast_voting_age_2018_character <- read_xlsx("Raw-data/votes_cast_voting_age_2018.xlsx", col_types = "text", skip = 2) %>%
+  clean_names() %>%
+  select(c(state_abbreviation, state_name, congressional_district))
+
+votes_cast_voting_age_2018 <- cbind(votes_cast_voting_age_2018_character, votes_cast_voting_age_2018_numeric) %>%
+  drop_na()
 
 votes_cast_voting_age_2018_revised <- votes_cast_voting_age_2018 %>%
   select(-line_number) %>%
@@ -323,6 +331,10 @@ voting_by_age_sex_nov_2018 %>%
 
 
 ```
+
+
+
+
 
 
 
