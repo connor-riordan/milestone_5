@@ -9,9 +9,9 @@ votes_cast_voting_age_2018_revised <- votes_cast_voting_age_2018 %>%
     drop_na() %>%
     rename("Votes Cast" = votes_cast_for_congressional_representative_for_the_november_6_2018_election1, 
            "Number of Eligible Citizens (Estimate)" = citizen_voting_age_population2,
-           "Margin of Error (MOE)" = x7,
+           "Margin of Error for Eligible Citizens" = x7,
            "Voting Rate" = voting_rate3,
-           "MOE" = x9)
+           "Margin of Error for Voting Rate" = x9)
 
 
 # Define UI for application
@@ -26,16 +26,16 @@ ui <- fluidPage(
                voting data from 2018."),
             
             selectInput("x var",
-                        label = "Choose a congressional district",
-                        choices = votes_cast_voting_age_2018_revised$state_abbreviation)
+                        label = "Choose a state:",
+                        choices = votes_cast_voting_age_2018_revised$state_abbreviation),
+            varSelectInput("variable", "Choose what you want to measure:", 
+                           votes_cast_voting_age_2018_revised, multiple = TRUE)
             ),
             
-        mainPanel("results")
+        mainPanel(
+        )
     )
-        
-  
 )
-
 # Define server logic required to draw a histogram
 server <- function(input, output) {
 
@@ -44,3 +44,4 @@ server <- function(input, output) {
 
 # Run the application 
 shinyApp(ui = ui, server = server)
+
